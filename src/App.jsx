@@ -1,0 +1,99 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AppProvider } from './context/StoreContext';
+
+// --- Shared Components (Global UI) ---
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import CartSidebar from './components/CartSidebar';
+import SearchOverlay from './components/SearchOverlay';
+import MobileMenu from './components/MobileMenu';
+import ToastContainer from './components/ToastContainer';
+import PageTitle from './components/PageTitle';
+import NewsletterModal from './components/NewsletterModal';
+
+// --- Pages (Main Content) ---
+import Home from './pages/Home';
+import Shop from './pages/Shop';
+import ProductPage from './pages/ProductPage';
+import Login from './pages/Login';
+import Checkout from './pages/Checkout';
+import Profile from './pages/Profile';
+import Wishlist from './pages/Wishlist';
+import AdminDashboard from './pages/AdminDashboard';
+import Lookbook from './pages/Lookbook';
+import OrderTracking from './pages/OrderTracking';
+import HelpCenter from './pages/HelpCenter';
+import AnnouncementBar from './components/AnnouncementBar';
+
+function App() {
+  return (
+    // Future flags enabled to silence React Router v7 warnings
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <AppProvider>
+        
+        {/* Helper to change Browser Tab Title based on route */}
+        <PageTitle />
+
+        {/* Main Layout: Flex column ensures Footer stays at the bottom */}
+        <div className="min-h-screen bg-corc-black text-white selection:bg-corc-gold selection:text-black font-sans flex flex-col">
+          
+          {/* --- Global Overlays (Always accessible) --- */}
+          <AnnouncementBar/>
+          <Navbar />
+          <CartSidebar />
+          <SearchOverlay />
+          <MobileMenu />
+          <ToastContainer />
+          <NewsletterModal />
+          
+          {/* --- Main Content Area --- */}
+          <div className="flex-1"> 
+            <Routes>
+              {/* Public Storefront */}
+              <Route path="/" element={<Home />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/product/:id" element={<ProductPage />} />
+              <Route path="/lookbook" element={<Lookbook />} />
+              
+              {/* Checkout Flow */}
+              <Route path="/cart" element={<Checkout />} /> {/* Alias */}
+              <Route path="/checkout" element={<Checkout />} />
+              
+              {/* User Account */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              
+              {/* Customer Support */}
+              <Route path="/track-order" element={<OrderTracking />} />
+              <Route path="/help" element={<HelpCenter />} />
+              
+              {/* Admin / Business Side */}
+              <Route path="/admin" element={<AdminDashboard />} />
+              
+              {/* 404 Page Not Found */}
+              <Route path="*" element={
+                <div className="h-screen flex flex-col items-center justify-center text-center px-4">
+                  <h1 className="text-6xl font-serif text-corc-gold mb-4">404</h1>
+                  <p className="text-gray-500 uppercase tracking-widest text-sm">
+                    Page not found in the matrix.
+                  </p>
+                  <a href="/" className="mt-8 border-b border-white pb-1 hover:text-corc-gold hover:border-corc-gold transition-colors text-sm uppercase tracking-wider">
+                    Return Home
+                  </a>
+                </div>
+              } />
+            </Routes>
+          </div>
+
+          {/* --- Global Footer --- */}
+          <Footer />
+          
+        </div>
+      </AppProvider>
+    </Router>
+  );
+}
+
+export default App;
