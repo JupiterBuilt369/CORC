@@ -2,20 +2,22 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/StoreContext';
 
-// --- Shared Components (Global UI) ---
+// --- Shared Components (Global Overlays) ---
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CartSidebar from './components/CartSidebar';
 import SearchOverlay from './components/SearchOverlay';
 import MobileMenu from './components/MobileMenu';
 import ToastContainer from './components/ToastContainer';
-import PageTitle from './components/PageTitle';
 import NewsletterModal from './components/NewsletterModal';
+import AnnouncementBar from './components/AnnouncementBar';
+import PageTitle from './components/PageTitle';
 
 // --- Pages (Main Content) ---
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import ProductPage from './pages/ProductPage';
+import CustomPrint from './pages/CustomPrint'; // <--- NEW IMPORT
 import Login from './pages/Login';
 import Checkout from './pages/Checkout';
 import Profile from './pages/Profile';
@@ -24,22 +26,23 @@ import AdminDashboard from './pages/AdminDashboard';
 import Lookbook from './pages/Lookbook';
 import OrderTracking from './pages/OrderTracking';
 import HelpCenter from './pages/HelpCenter';
-import AnnouncementBar from './components/AnnouncementBar';
+import ForgotPassword from './pages/ForgotPassword';
+import Register from './pages/Register';
 
 function App() {
   return (
     // Future flags enabled to silence React Router v7 warnings
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <AppProvider>
+     <AppProvider>
         
-        {/* Helper to change Browser Tab Title based on route */}
+        {/* Dynamic Browser Tab Titles */}
         <PageTitle />
 
-        {/* Main Layout: Flex column ensures Footer stays at the bottom */}
+        {/* Main Layout Wrapper: Flex column ensures Footer stays at the bottom */}
         <div className="min-h-screen bg-corc-black text-white selection:bg-corc-gold selection:text-black font-sans flex flex-col">
           
           {/* --- Global Overlays (Always accessible) --- */}
-          <AnnouncementBar/>
+          <AnnouncementBar />
           <Navbar />
           <CartSidebar />
           <SearchOverlay />
@@ -50,22 +53,25 @@ function App() {
           {/* --- Main Content Area --- */}
           <div className="flex-1"> 
             <Routes>
-              {/* Public Storefront */}
+              {/* Storefront */}
               <Route path="/" element={<Home />} />
               <Route path="/shop" element={<Shop />} />
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/lookbook" element={<Lookbook />} />
+              <Route path="/custom" element={<CustomPrint />} /> {/* <--- NEW ROUTE */}
               
-              {/* Checkout Flow */}
-              <Route path="/cart" element={<Checkout />} /> {/* Alias */}
+              {/* Transactional */}
+              <Route path="/cart" element={<Checkout />} />
               <Route path="/checkout" element={<Checkout />} />
               
               {/* User Account */}
+              <Route path="/register" element={<Register />} /> 
               <Route path="/login" element={<Login />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/forgotPassword" element={<ForgotPassword />} />
               <Route path="/wishlist" element={<Wishlist />} />
               
-              {/* Customer Support */}
+              {/* Support & Utility */}
               <Route path="/track-order" element={<OrderTracking />} />
               <Route path="/help" element={<HelpCenter />} />
               

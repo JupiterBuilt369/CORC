@@ -7,15 +7,31 @@ export const AppProvider = ({ children }) => {
   // --- USER STATE ---
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('corc-user');
-    return saved ? JSON.parse(saved) : { 
-      name: "Founder", 
-      email: "admin@corc.com", 
+    return saved ? JSON.parse(saved) : {
+      name: "Founder",
+      email: "admin@corc.com",
       phone: "+1 (555) 019-2834",
       avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200",
-      isAdmin: true 
+      isAdmin: true
     };
   });
 
+  const registerUser = (userData) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newUser = {
+          name: userData.name,
+          email: userData.email,
+          phone: "", // Empty for now
+          avatar: "", // Empty for now
+          isAdmin: false // New users are not admins
+        };
+        setUser(newUser);
+        addToast(`Welcome, ${newUser.name}`);
+        resolve(newUser);
+      }, 1500); // Simulate network delay
+    });
+  };
   // --- ADDRESS BOOK ---
   const [addresses, setAddresses] = useState(() => {
     const saved = localStorage.getItem('corc-addresses');
@@ -62,7 +78,7 @@ export const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [
       {
         id: 101,
-        productId: 1, 
+        productId: 1,
         userName: "Alex K.",
         userAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100",
         rating: 5,
@@ -115,10 +131,10 @@ export const AppProvider = ({ children }) => {
   const removeAddress = (id) => { setAddresses(prev => prev.filter(a => a.id !== id)); addToast("Address Removed"); };
   const addCard = (card) => { setCards(prev => [...prev, { ...card, id: Date.now() }]); addToast("Card Saved"); };
   const removeCard = (id) => { setCards(prev => prev.filter(c => c.id !== id)); addToast("Card Removed"); };
-  
+
   const addProduct = (newProduct) => { setProducts(prev => [{ ...newProduct, id: Date.now() }, ...prev]); addToast(`Product Created`); };
   const deleteProduct = (id) => { setProducts(prev => prev.filter(p => p.id !== id)); addToast("Product Deleted"); };
-  
+
   const addToCart = (product) => {
     setCart(prev => {
       const uniqueId = `${product.id}-${product.size || 'M'}`;
@@ -129,7 +145,21 @@ export const AppProvider = ({ children }) => {
     addToast(`Added to Cart`);
     setIsCartOpen(true);
   };
+
   const removeFromCart = (uniqueId) => setCart(prev => prev.filter(p => p.uniqueId !== uniqueId));
+
+  // --- NEW: UPDATE QUANTITY FUNCTION ---
+  const updateQuantity = (uniqueId, delta) => {
+    setCart(prev => prev.map(item => {
+      if (item.uniqueId === uniqueId) {
+        // Ensure quantity never goes below 1
+        const newQuantity = Math.max(1, item.quantity + delta);
+        return { ...item, quantity: newQuantity };
+      }
+      return item;
+    }));
+  };
+
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const toggleWishlist = (product) => {
@@ -162,15 +192,15 @@ export const AppProvider = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={{ 
-      user, setUser, updateUser,
+    <AppContext.Provider value={{
+      user, setUser, updateUser, registerUser,
       addresses, addAddress, removeAddress,
       cards, addCard, removeCard,
       products, setProducts, addProduct, deleteProduct,
-      cart, addToCart, removeFromCart, cartTotal,
+      cart, addToCart, removeFromCart, updateQuantity, cartTotal, // <--- EXPORT updateQuantity
       wishlist, toggleWishlist, isInWishlist,
       orders, placeOrder,
-      reviews, addReview, // <--- Now exported correctly
+      reviews, addReview,
       isCartOpen, setIsCartOpen, isSearchOpen, setIsSearchOpen, isMenuOpen, setIsMenuOpen,
       toasts, addToast, removeToast
     }}>
