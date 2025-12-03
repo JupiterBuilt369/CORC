@@ -12,13 +12,16 @@ import ToastContainer from './components/ToastContainer';
 import NewsletterModal from './components/NewsletterModal';
 import AnnouncementBar from './components/AnnouncementBar';
 import PageTitle from './components/PageTitle';
+import AdminRoute from './components/AdminRoute'; // <--- IMPORTED ADMIN ROUTE
 
 // --- Pages (Main Content) ---
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import ProductPage from './pages/ProductPage';
-import CustomPrint from './pages/CustomPrint'; // <--- NEW IMPORT
+import CustomPrint from './pages/CustomPrint';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Checkout from './pages/Checkout';
 import Profile from './pages/Profile';
 import Wishlist from './pages/Wishlist';
@@ -26,14 +29,12 @@ import AdminDashboard from './pages/AdminDashboard';
 import Lookbook from './pages/Lookbook';
 import OrderTracking from './pages/OrderTracking';
 import HelpCenter from './pages/HelpCenter';
-import ForgotPassword from './pages/ForgotPassword';
-import Register from './pages/Register';
 
 function App() {
   return (
     // Future flags enabled to silence React Router v7 warnings
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-     <AppProvider>
+      <AppProvider>
         
         {/* Dynamic Browser Tab Titles */}
         <PageTitle />
@@ -58,25 +59,32 @@ function App() {
               <Route path="/shop" element={<Shop />} />
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/lookbook" element={<Lookbook />} />
-              <Route path="/custom" element={<CustomPrint />} /> {/* <--- NEW ROUTE */}
+              <Route path="/custom" element={<CustomPrint />} />
               
               {/* Transactional */}
-              <Route path="/cart" element={<Checkout />} />
+              <Route path="/cart" element={<Checkout />} /> {/* Alias */}
               <Route path="/checkout" element={<Checkout />} />
               
               {/* User Account */}
-              <Route path="/register" element={<Register />} /> 
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/forgotPassword" element={<ForgotPassword />} />
               <Route path="/wishlist" element={<Wishlist />} />
               
               {/* Support & Utility */}
               <Route path="/track-order" element={<OrderTracking />} />
               <Route path="/help" element={<HelpCenter />} />
               
-              {/* Admin / Business Side */}
-              <Route path="/admin" element={<AdminDashboard />} />
+              {/* PROTECTED ADMIN ROUTE */}
+              <Route 
+                path="/admin" 
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                } 
+              />
               
               {/* 404 Page Not Found */}
               <Route path="*" element={

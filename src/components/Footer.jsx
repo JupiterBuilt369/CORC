@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer className="bg-corc-black border-t border-white/10 pt-20 pb-10 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
-        
+
         {/* Brand */}
         <div className="md:col-span-1">
           <Link to="/" className="text-4xl font-serif font-bold text-white tracking-tighter">-CORC-</Link>
@@ -37,12 +37,13 @@ const Footer = () => {
         </div>
 
         {/* Newsletter */}
+        {/* Column 4: Newsletter */}
         <div>
           <h4 className="text-white font-serif mb-6">Stay in the loop</h4>
           <div className="flex border-b border-white/20 pb-2">
-            <input 
-              type="email" 
-              placeholder="ENTER EMAIL" 
+            <input
+              type="email"
+              placeholder="ENTER EMAIL"
               className="bg-transparent w-full outline-none text-xs uppercase tracking-widest focus:placeholder-white transition-colors"
             />
             <button className="text-corc-gold hover:text-white transition-colors">
