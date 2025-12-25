@@ -14,16 +14,20 @@ const Login = () => {
     setLoading(true); 
     
     // Call Context Login function
-    loginUser(formData.email, formData.password).then((loggedInUser) => { 
-      setLoading(false);
-      
-      // Redirect based on Role (Admin vs Customer)
-      if (loggedInUser.isAdmin) {
-        navigate('/admin'); // Founder goes to Dashboard
-      } else {
-        navigate('/shop');  // Customer goes to Shop
-      }
-    }); 
+    loginUser(formData.email, formData.password)
+      .then((loggedInUser) => { 
+        setLoading(false);
+        
+        // Redirect based on Role (Admin vs Customer)
+        if (loggedInUser && loggedInUser.isAdmin) {
+          navigate('/admin'); // Founder goes to Dashboard
+        } else {
+          navigate('/shop');  // Customer goes to Shop
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   };
 
   return (

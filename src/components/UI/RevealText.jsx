@@ -1,7 +1,8 @@
-    import React from "react";
+    import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 const RevealText = ({ children, delay = 0, className = "" }) => {
+  const [c,setC] = useState(0);
   return (
     // 1. The Mask: Hides the text when it is "below" the visible area
     <div style={{ position: "relative", overflow: "hidden", display: "inline-block" }} className={className}>

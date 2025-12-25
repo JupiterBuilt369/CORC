@@ -13,6 +13,7 @@ import NewsletterModal from './components/NewsletterModal';
 import AnnouncementBar from './components/AnnouncementBar';
 import PageTitle from './components/PageTitle';
 import AdminRoute from './components/AdminRoute'; // <--- IMPORTED ADMIN ROUTE
+import ProtectedRoute from './components/ProtectedRoute';
 
 // --- Pages (Main Content) ---
 import Home from './pages/Home';
@@ -62,15 +63,15 @@ function App() {
               <Route path="/custom" element={<CustomPrint />} />
               
               {/* Transactional */}
-              <Route path="/cart" element={<Checkout />} /> {/* Alias */}
-              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/cart" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
               
               {/* User Account */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
               
               {/* Support & Utility */}
               <Route path="/track-order" element={<OrderTracking />} />

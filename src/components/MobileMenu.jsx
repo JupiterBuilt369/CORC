@@ -1,17 +1,11 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Instagram, Twitter, Facebook } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
 const MobileMenu = () => {
-  const { isMenuOpen, setIsMenuOpen, user } = useStore();
-  const navigate = useNavigate();
-
-  const handleLink = (path) => {
-    setIsMenuOpen(false);
-    navigate(path);
-  };
+  const { isMenuOpen, setIsMenuOpen, user, seedDatabase } = useStore();
 
   const menuVars = {
     initial: { scaleY: 0 },
@@ -39,6 +33,7 @@ const MobileMenu = () => {
     <AnimatePresence>
       {isMenuOpen && (
         <motion.div
+          key="mobile-menu"
           variants={menuVars}
           initial="initial"
           animate="animate"
@@ -69,12 +64,13 @@ const MobileMenu = () => {
             ].map((link, index) => (
               <div key={index} className="overflow-hidden">
                 <motion.div variants={linkVars}>
-                  <button 
-                    onClick={() => handleLink(link.path)}
-                    className="text-5xl font-serif text-black hover:text-white transition-colors text-left w-full uppercase leading-none"
+                  <Link 
+                    to={link.path}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block text-5xl font-serif text-black hover:text-white transition-colors text-left w-full uppercase leading-none"
                   >
                     {link.title}
-                  </button>
+                  </Link>
                 </motion.div>
               </div>
             ))}
@@ -83,13 +79,28 @@ const MobileMenu = () => {
             <div className="overflow-hidden mt-8 pt-8 border-t border-black/20">
                <motion.div variants={linkVars}>
                  {user ? (
-                   <button onClick={() => handleLink('/profile')} className="text-xl font-bold uppercase tracking-widest text-black">
+                   <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="block text-xl font-bold uppercase tracking-widest text-black">
                      Account: {user.name}
-                   </button>
+                   </Link>
                  ) : (
-                   <button onClick={() => handleLink('/login')} className="text-xl font-bold uppercase tracking-widest text-black">
+                   <Link to="/login" onClick={() => setIsMenuOpen(false)} className="block text-xl font-bold uppercase tracking-widest text-black">
                      Login / Register
-                   </button>
+                   </Link>
+                 )}
+                 
+                 {/* Admin Links */}
+                 {user?.isAdmin && (
+                   <>
+                     <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="block text-xl font-bold uppercase tracking-widest text-red-600 mt-6">
+                       Admin Dashboard
+                     </Link>
+                     <button 
+                       onClick={() => { seedDatabase(); setIsMenuOpen(false); }} 
+                       className="block text-sm font-bold uppercase tracking-widest text-gray-400 mt-2 text-left"
+                     >
+                       [Dev] Seed Database
+                     </button>
+                   </>
                  )}
                </motion.div>
             </div>

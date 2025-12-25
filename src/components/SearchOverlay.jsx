@@ -3,20 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
-import { api } from '../api';
 
 const SearchOverlay = () => {
-  const { isSearchOpen, setIsSearchOpen } = useStore();
+  const { isSearchOpen, setIsSearchOpen, products } = useStore();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [products, setProducts] = useState([]);
   const [results, setResults] = useState([]);
 
-  // Fetch all products once to filter locally
+  // Reset query on open
   useEffect(() => {
     if (isSearchOpen) {
-      api.getProducts().then(setProducts);
-      setQuery(''); // Reset query on open
+      setQuery(''); 
       setResults([]);
     }
   }, [isSearchOpen]);
@@ -81,7 +78,9 @@ const SearchOverlay = () => {
                   onClick={() => handleNavigate(product.id)}
                   className="flex items-center gap-4 p-4 border border-white/5 hover:border-corc-gold/50 cursor-pointer bg-white/5 transition-colors group"
                 >
-                  <img src={product.image} className="w-16 h-20 object-cover" alt={product.name} />
+                  {product.imageUrls && product.imageUrls.length > 0 ? (
+                    <img src={product.imageUrls[0]} className="w-16 h-20 object-cover" alt={product.name} />
+                  ) : <div className="w-16 h-20 bg-gray-800" />}
                   <div className="flex-1">
                     <h4 className="font-serif text-lg group-hover:text-corc-gold transition-colors">{product.name}</h4>
                     <p className="text-xs text-gray-500 uppercase">{product.category}</p>

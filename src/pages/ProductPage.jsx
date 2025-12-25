@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Loader2, Heart, Star, Ruler, AlertCircle, Camera, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { api } from '../api';
+import { doc, getDoc, collection, getDocs, query, where, limit } from 'firebase/firestore';
+import { db } from '../firebase';
 import { useStore } from '../context/StoreContext';
 
 const ProductPage = () => {
@@ -22,7 +23,7 @@ const ProductPage = () => {
   const [showReviewForm, setShowReviewForm] = useState(false);
 
   // Calculate Average Rating safely
-  const productReviews = reviews ? reviews.filter(r => r.productId === parseInt(id)) : [];
+  const productReviews = reviews ? reviews.filter(r => r.productId === id) : [];
   const averageRating = productReviews.length 
     ? (productReviews.reduce((acc, r) => acc + r.rating, 0) / productReviews.length).toFixed(1) 
     : 0;
@@ -30,27 +31,35 @@ const ProductPage = () => {
   useEffect(() => {
     setLoading(true);
     
-    // 1. Fetch current product
-    api.getProductById(id).then(data => {
-      // SAFETY CHECK: If product doesn't exist, stop here to prevent crash
-      if (!data) {
-        setProduct(null);
-        setLoading(false);
-        return;
-      }
+    const fetchProductData = async () => {
+      try {
+        // 1. Fetch current product from Firestore
+        const docRef = doc(db, "products", id);
+        const docSnap = await getDoc(docRef);
 
-      setProduct(data);
-      
-      // 2. Fetch all products to find related ones
-      api.getProducts().then(allProducts => {
-        if (!allProducts) return;
-        const related = allProducts
-          .filter(p => p.category === data.category && p.id !== data.id)
-          .slice(0, 3);
-        setRelatedProducts(related);
+        if (docSnap.exists()) {
+          const data = { id: docSnap.id, ...docSnap.data() };
+          setProduct(data);
+
+          // 2. Fetch related products
+          const q = query(collection(db, "products"), where("category", "==", data.category), limit(4));
+          const querySnapshot = await getDocs(q);
+          const related = querySnapshot.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .filter(p => p.id !== data.id)
+            .slice(0, 3);
+          setRelatedProducts(related);
+        } else {
+          setProduct(null);
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      } finally {
         setLoading(false);
-      });
-    });
+      }
+    };
+    
+    fetchProductData();
     
     // Scroll to top when ID changes
     window.scrollTo(0, 0);
@@ -65,7 +74,7 @@ const ProductPage = () => {
     </div>
   );
 
-  const stockLevel = (product.id % 5) + 2; // Fake stock logic
+  const stockLevel = product.stock || 0;
 
   const handleAdd = () => {
     if (!selectedSize) return alert("Please select a size.");
@@ -80,6 +89,7 @@ const ProductPage = () => {
       userName: user ? user.name : "Guest",
       userAvatar: user ? user.avatar : null,
       rating,
+      createdAt: new Date().toISOString(),
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       text: reviewText,
       image: reviewImage || null
@@ -123,7 +133,9 @@ const ProductPage = () => {
           <button onClick={() => toggleWishlist(product)} className="absolute top-6 right-6 z-20 p-3 rounded-full bg-black/40 backdrop-blur-md hover:bg-white hover:text-red-500 transition-all">
             <Heart className={`w-6 h-6 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : 'text-white'}`} />
           </button>
-          <img src={product.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          {product.imageUrls && product.imageUrls.length > 0 && (
+            <img src={product.imageUrls[0]} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          )}
         </div>
 
         {/* Right: Details */}
@@ -164,16 +176,20 @@ const ProductPage = () => {
           </div>
 
           {/* Scarcity Indicator */}
-          {stockLevel < 5 && (
+          {stockLevel > 0 && stockLevel < 5 && (
             <div className="flex items-center gap-2 text-red-500 text-xs font-bold uppercase tracking-widest animate-pulse">
               <AlertCircle className="w-4 h-4" />
               Only {stockLevel} items left in stock
             </div>
           )}
+          
+          {stockLevel === 0 && (
+             <div className="text-red-500 text-xs font-bold uppercase tracking-widest">Out of Stock</div>
+          )}
 
           <div className="pt-8 border-t border-white/10">
-            <button onClick={handleAdd} className={`w-full py-5 uppercase font-bold tracking-[0.2em] transition-all ${selectedSize ? 'bg-corc-gold text-black hover:bg-white' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}>
-              {selectedSize ? `Add to Cart — $${product.price}` : 'Select a Size'}
+            <button onClick={handleAdd} disabled={stockLevel === 0} className={`w-full py-5 uppercase font-bold tracking-[0.2em] transition-all ${selectedSize && stockLevel > 0 ? 'bg-corc-gold text-black hover:bg-white' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}>
+              {stockLevel === 0 ? 'Sold Out' : selectedSize ? `Add to Cart — $${product.price}` : 'Select a Size'}
             </button>
           </div>
         </div>
@@ -274,7 +290,9 @@ const ProductPage = () => {
               <Link to={`/product/${p.id}`} key={p.id}>
                 <div className="group cursor-pointer">
                   <div className="h-[400px] bg-gray-900 border border-white/5 overflow-hidden">
-                    <img src={p.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100" />
+                    {p.imageUrls && p.imageUrls.length > 0 && (
+                      <img src={p.imageUrls[0]} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100" />
+                    )}
                   </div>
                   <div className="mt-4">
                     <h3 className="font-serif text-lg">{p.name}</h3>
@@ -290,4 +308,4 @@ const ProductPage = () => {
   );
 };
 
-export default ProductPage;
+export default ProductPage; 
