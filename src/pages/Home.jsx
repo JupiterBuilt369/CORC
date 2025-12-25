@@ -28,7 +28,7 @@ const Home = () => {
               transition={{ delay: 0.5 }}
               className="inline-block px-3 py-1 border border-corc-gold/30 text-corc-gold text-[10px] uppercase tracking-widest mb-4"
             >
-              New Collection 2025
+              New Collection 2026
             </motion.div>
             
             {/* HEADLINE WITH REVEAL ANIMATION */}
